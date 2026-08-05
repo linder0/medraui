@@ -1,0 +1,131 @@
+@import 'tailwindcss';
+@import './design-system/tokens.css';
+
+/**
+ * Tailwind theme mapping.
+ * Utilities reference semantic tokens only, so retheming the entire
+ * product is a matter of editing tokens.css.
+ */
+@theme {
+  --font-sans: var(--font-sans);
+  --font-mono: var(--font-mono);
+
+  --color-*: initial;
+
+  /* Surfaces */
+  --color-app: var(--surface-app);
+  --color-raised: var(--surface-raised);
+  --color-sunken: var(--surface-sunken);
+  --color-panel: var(--surface-panel);
+  --color-sidebar: var(--surface-sidebar);
+  --color-sidebar-raised: var(--surface-sidebar-raised);
+  --color-inverse: var(--surface-inverse);
+  --color-glow: var(--surface-glow);
+
+  /* Text */
+  --color-primary: var(--text-primary);
+  --color-secondary: var(--text-secondary);
+  --color-tertiary: var(--text-tertiary);
+  --color-on-inverse: var(--text-inverse);
+  --color-on-inverse-muted: var(--text-inverse-muted);
+  --color-accent: var(--text-accent);
+  --color-accent-soft: var(--medra-indigo-50);
+
+  /* Borders */
+  --color-edge: var(--border-default);
+  --color-edge-strong: var(--border-strong);
+  --color-edge-inverse: var(--border-inverse);
+
+  /* Actions */
+  --color-action: var(--action-primary-bg);
+  --color-action-hover: var(--action-primary-bg-hover);
+  --color-on-action: var(--action-primary-text);
+  --color-ring: var(--focus-ring);
+
+  /* Status */
+  --color-success: var(--status-success-text);
+  --color-success-soft: var(--status-success-bg);
+  --color-warning: var(--status-warning-text);
+  --color-warning-soft: var(--status-warning-bg);
+  --color-danger: var(--status-danger-text);
+  --color-danger-soft: var(--status-danger-bg);
+  --color-info: var(--status-info-text);
+  --color-info-soft: var(--status-info-bg);
+  --color-neutral: var(--status-neutral-text);
+  --color-neutral-soft: var(--status-neutral-bg);
+
+  /* White for the odd literal case (overlays etc.) */
+  --color-white: #ffffff;
+
+  /* Type scale */
+  --text-2xs: var(--text-2xs);
+  --text-xs: var(--text-xs);
+  --text-sm: var(--text-sm);
+  --text-md: var(--text-md);
+  --text-lg: var(--text-lg);
+  --text-xl: var(--text-xl);
+  --text-2xl: var(--text-2xl);
+  --text-3xl: var(--text-3xl);
+
+  /* Shape */
+  --radius-xs: var(--radius-xs);
+  --radius-sm: var(--radius-sm);
+  --radius-md: var(--radius-md);
+  --radius-lg: var(--radius-lg);
+  --radius-xl: var(--radius-xl);
+
+  /* Elevation */
+  --shadow-xs: var(--shadow-xs);
+  --shadow-sm: var(--shadow-sm);
+  --shadow-md: var(--shadow-md);
+  --shadow-lg: var(--shadow-lg);
+
+  /* Motion */
+  --ease-smooth: var(--ease-smooth);
+}
+
+@layer base {
+  /* Tailwind v4 preflight resets buttons to cursor: default —
+     interactive elements should always read as clickable. */
+  button:not(:disabled),
+  [role='button']:not(:disabled) {
+    cursor: pointer;
+  }
+
+  /* Background-aware scrollbars: the thumb is the local text color at
+     low alpha, so it reads soft gray on light surfaces and pale on the
+     dark sidebar — instead of the browser's harsh near-black default.
+     The track stays transparent so the bar floats over content. */
+  * {
+    scrollbar-width: thin;
+    scrollbar-color: color-mix(in oklab, currentColor 30%, transparent)
+      transparent;
+  }
+}
+
+html,
+body {
+  height: 100%;
+}
+
+/* Lock the viewport: no rubber-band overscroll, and paint the root
+   the same as the app canvas so any bounce a browser still allows
+   (e.g. older Safari) reveals matching color instead of white. */
+html {
+  overscroll-behavior: none;
+  background: var(--surface-app);
+  /* The app is light-themed regardless of OS setting; scrollbars and
+     form controls render for light surfaces. Dark surfaces (sidebar)
+     opt into `scheme-dark` locally so their scrollbars invert. */
+  color-scheme: light;
+}
+
+body {
+  overscroll-behavior: none;
+  font-family: var(--font-sans);
+  background: var(--surface-app);
+  color: var(--text-primary);
+  font-size: var(--text-md);
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
