@@ -3,7 +3,7 @@
 import { useEffect, useRef } from 'react'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
-import { ChevronDown, MessagesSquare } from 'lucide-react'
+import { MessagesSquare } from 'lucide-react'
 import {
   Rows,
   TestTube,
@@ -12,8 +12,9 @@ import {
   Chats,
   type Icon,
 } from '@phosphor-icons/react'
-import { Avatar, Button, Kicker, Progress } from '@/design-system'
+import { Button, Kicker, Progress } from '@/design-system'
 import { ContextPanel } from '@/components/layout/ContextPanel'
+import { CampaignSwitcher } from '@/components/campaign/CampaignSwitcher'
 import { useExperimentalist } from '@/components/experimentalist/ExperimentalistContext'
 import { ProximityPill } from '@/components/nav/ProximityPill'
 import {
@@ -155,25 +156,14 @@ function CampaignNav({ campaign }: { campaign: Campaign }) {
 
 export function CampaignPanel({ campaign }: { campaign: Campaign }) {
   const { openExperimentalist } = useExperimentalist()
-  const completedGoals = campaign.goals.filter((g) => g.status === 'completed').length
-  const activeGoals = campaign.goals.filter((g) => g.status === 'active').length
+  const completedGoals = campaign.goals.filter(
+    (g) => g.status === 'completed',
+  ).length
+  const openGoals = campaign.goals.filter((g) => g.status !== 'completed').length
 
   return (
     <ContextPanel
-      header={
-        <button className="flex w-full items-center gap-2.5 rounded-md p-1.5 text-left transition-colors hover:bg-sunken">
-          <Avatar name={campaign.name} />
-          <span className="min-w-0 flex-1">
-            <span className="block truncate text-sm font-semibold text-primary">
-              {campaign.name}
-            </span>
-            <span className="block text-xs text-tertiary">
-              Updated {campaign.updatedAgo}
-            </span>
-          </span>
-          <ChevronDown className="size-4 shrink-0 text-tertiary" strokeWidth={1.75} />
-        </button>
-      }
+      header={<CampaignSwitcher campaign={campaign} />}
       footer={
         <div className="rounded-lg border border-edge bg-raised p-3 shadow-xs">
           <p className="text-sm font-semibold text-primary">AI Experimentalist</p>
@@ -204,7 +194,7 @@ export function CampaignPanel({ campaign }: { campaign: Campaign }) {
           </span>
         </div>
         <p className="mt-2 text-xs text-tertiary">
-          {completedGoals} completed · {activeGoals} active goals
+          {completedGoals} completed · {openGoals} open goals
         </p>
       </div>
     </ContextPanel>

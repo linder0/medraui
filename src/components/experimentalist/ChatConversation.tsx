@@ -2,25 +2,24 @@
 
 import { useEffect, useRef, useState } from 'react'
 import { AnimatePresence, motion } from 'motion/react'
-import { ArrowUp, ChevronDown, Paperclip } from 'lucide-react'
+import { ArrowUp, Check, ChevronDown, Paperclip, X } from 'lucide-react'
+import ReactMarkdown from 'react-markdown'
+import remarkGfm from 'remark-gfm'
 import { Kicker } from '@/design-system'
 import { spring } from '@/lib/springs'
 import { cn } from '@/lib/cn'
 import type { Campaign, ChatMessage } from '@/data/types'
 import { ExperimentalistOrb } from './ExperimentalistOrb'
+import { PlanVariantsExplorer } from './PlanVariantsExplorer'
+import { DropdownMenu } from './DropdownMenu'
+import { composeReply } from './agentScript'
 
 const SUGGESTIONS = [
   'Where do my goals stand?',
   'What should I focus on next?',
 ]
 
-/** Canned Experimentalist replies — placeholder until a real model is wired
- *  in. Rotates so repeated sends don't echo the same line. */
-const REPLIES = [
-  'Got it. I\u2019ll pull the campaign context and knowledge base, then propose a first set of goals for you to approve.',
-  'Here\u2019s how I\u2019d sequence this: confirm the objective, draft 2\u20133 measurable goals, then outline the assays each goal needs. Sound right?',
-  'I can turn that into a concrete plan. Want me to draft goals now, or review the indexed files first?',
-]
+const VARIANTS_SUGGESTION = 'Explore alternative designs'
 
 let messageSeq = 0
 function nextId() {
@@ -56,43 +55,157 @@ function ApprovalToggle() {
   )
 }
 
+function Attachments({
+  names,
+  isUser,
+}: {
+  names: string[]
+  isUser: boolean
+}) {
+  return (
+    <div className="mt-2 flex flex-wrap gap-1.5">
+      {names.map((name) => (
+        <span
+          key={name}
+          className={cn(
+            'inline-flex max-w-56 items-center gap-1 rounded-sm px-1.5 py-0.5 text-xs',
+            isUser ? 'bg-white/15 text-on-action' : 'bg-sunken text-secondary',
+          )}
+        >
+          <Paperclip className="size-3 shrink-0" strokeWidth={1.75} />
+          <span className="truncate">{name}</span>
+        </span>
+      ))}
+    </div>
+  )
+}
+
+function AssistantMarkdown({ content }: { content: string }) {
+  return (
+    <ReactMarkdown
+      remarkPlugins={[remarkGfm]}
+      components={{
+        p: ({ children }) => (
+          <p className="my-2.5 first:mt-0 last:mb-0">{children}</p>
+        ),
+        strong: ({ children }) => (
+          <strong className="font-semibold text-primary">{children}</strong>
+        ),
+        h1: ({ children }) => (
+          <h3 className="mt-5 mb-2 text-base font-semibold text-primary first:mt-0">
+            {children}
+          </h3>
+        ),
+        h2: ({ children }) => (
+          <h3 className="mt-5 mb-2 text-base font-semibold text-primary first:mt-0">
+            {children}
+          </h3>
+        ),
+        h3: ({ children }) => (
+          <h4 className="mt-4 mb-1.5 text-sm font-semibold text-primary first:mt-0">
+            {children}
+          </h4>
+        ),
+        ul: ({ children }) => (
+          <ul className="my-2.5 list-disc space-y-1 pl-5 first:mt-0 last:mb-0">
+            {children}
+          </ul>
+        ),
+        ol: ({ children }) => (
+          <ol className="my-2.5 list-decimal space-y-1 pl-5 first:mt-0 last:mb-0">
+            {children}
+          </ol>
+        ),
+        li: ({ children }) => <li className="leading-relaxed">{children}</li>,
+        code: ({ children }) => (
+          <code className="rounded-xs bg-sunken px-1 py-0.5 font-mono text-[0.85em]">
+            {children}
+          </code>
+        ),
+        pre: ({ children }) => (
+          <pre className="my-2.5 overflow-x-auto rounded-md border border-edge bg-sunken p-3 text-xs first:mt-0 last:mb-0 [&_code]:bg-transparent [&_code]:p-0">
+            {children}
+          </pre>
+        ),
+        blockquote: ({ children }) => (
+          <blockquote className="my-2.5 border-l-2 border-edge-strong pl-3 text-secondary first:mt-0 last:mb-0">
+            {children}
+          </blockquote>
+        ),
+        a: ({ children, href }) => (
+          <a
+            href={href}
+            className="text-accent underline underline-offset-2"
+            target="_blank"
+            rel="noreferrer"
+          >
+            {children}
+          </a>
+        ),
+        hr: () => <hr className="my-4 border-edge" />,
+      }}
+    >
+      {content}
+    </ReactMarkdown>
+  )
+}
+
 function MessageBubble({ message }: { message: ChatMessage }) {
   const isUser = message.role === 'user'
+
+  if (isUser) {
+    return (
+      <motion.div
+        layout
+        initial={{ opacity: 0, y: 8 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={spring.moderate}
+        className="flex justify-end"
+      >
+        <div className="max-w-[78%] whitespace-pre-line rounded-lg bg-action px-3.5 py-2.5 text-sm leading-relaxed text-on-action">
+          {message.content}
+          {message.attachments && message.attachments.length > 0 && (
+            <Attachments names={message.attachments} isUser />
+          )}
+        </div>
+      </motion.div>
+    )
+  }
+
   return (
     <motion.div
       layout
       initial={{ opacity: 0, y: 8 }}
       animate={{ opacity: 1, y: 0 }}
       transition={spring.moderate}
-      className={cn('flex gap-3', isUser ? 'justify-end' : 'justify-start')}
+      className="text-sm leading-relaxed text-primary"
     >
-      {!isUser && <ExperimentalistOrb className="mt-0.5 size-6" />}
-      <div
-        className={cn(
-          'max-w-[78%] rounded-lg px-3.5 py-2.5 text-sm leading-relaxed',
-          isUser
-            ? 'bg-action text-on-action'
-            : 'border border-edge bg-raised text-primary shadow-xs',
-        )}
-      >
-        {message.content}
-      </div>
+      <AssistantMarkdown content={message.content} />
+      {message.attachments && message.attachments.length > 0 && (
+        <Attachments names={message.attachments} isUser={false} />
+      )}
     </motion.div>
   )
 }
 
 export function ChatConversation({
   campaign,
-  initialMessages,
+  messages,
+  onMessagesChange,
 }: {
   campaign: Campaign
-  initialMessages: ChatMessage[]
+  messages: ChatMessage[]
+  /** Messages live with their chat in the parent so history survives
+   *  switching chats; updates are functional so a pending assistant reply
+   *  still lands in the right chat. */
+  onMessagesChange: (updater: (prev: ChatMessage[]) => ChatMessage[]) => void
 }) {
-  const [messages, setMessages] = useState<ChatMessage[]>(initialMessages)
   const [draft, setDraft] = useState('')
+  const [attachments, setAttachments] = useState<string[]>([])
+  const [focus, setFocus] = useState('Campaign')
   const [thinking, setThinking] = useState(false)
   const scrollRef = useRef<HTMLDivElement>(null)
-  const replyIndex = useRef(0)
+  const attachInputRef = useRef<HTMLInputElement>(null)
 
   useEffect(() => {
     scrollRef.current?.scrollTo({
@@ -103,22 +216,33 @@ export function ChatConversation({
 
   function send(text: string) {
     const content = text.trim()
-    if (!content) return
+    if (!content && attachments.length === 0) return
     setDraft('')
-    setMessages((prev) => [
+    const sentAttachments = attachments
+    setAttachments([])
+    onMessagesChange((prev) => [
       ...prev,
-      { id: nextId(), role: 'user', content },
+      {
+        id: nextId(),
+        role: 'user',
+        content: content || `Attached ${sentAttachments.length} file${sentAttachments.length === 1 ? '' : 's'}.`,
+        ...(sentAttachments.length > 0 ? { attachments: sentAttachments } : {}),
+      },
     ])
     setThinking(true)
-    const reply = REPLIES[replyIndex.current % REPLIES.length]!
-    replyIndex.current += 1
+    const scripted = composeReply(campaign, content)
+    const reply: ChatMessage = {
+      id: nextId(),
+      role: 'assistant',
+      content: scripted.content,
+      ...(scripted.attachment ? { attachment: scripted.attachment } : {}),
+    }
+    // Longer replies "think" a bit longer so the pacing feels like a model.
+    const delay = Math.min(2200, 700 + scripted.content.length * 2)
     window.setTimeout(() => {
-      setMessages((prev) => [
-        ...prev,
-        { id: nextId(), role: 'assistant', content: reply },
-      ])
+      onMessagesChange((prev) => [...prev, reply])
       setThinking(false)
-    }, 750)
+    }, delay)
   }
 
   const isEmpty = messages.length === 0
@@ -146,7 +270,20 @@ export function ChatConversation({
           <div className="mx-auto flex max-w-3xl flex-col gap-4 px-6 py-6">
             <AnimatePresence initial={false}>
               {messages.map((message) => (
-                <MessageBubble key={message.id} message={message} />
+                <div key={message.id} className="flex flex-col gap-4">
+                  <MessageBubble message={message} />
+                  {message.attachment === 'plan-variants' && (
+                    <motion.div
+                      initial={{ opacity: 0, y: 8 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={spring.moderate}
+                    >
+                      <PlanVariantsExplorer
+                        variants={campaign.planVariants}
+                      />
+                    </motion.div>
+                  )}
+                </div>
               ))}
             </AnimatePresence>
             {thinking && (
@@ -167,7 +304,12 @@ export function ChatConversation({
         <div className="mx-auto max-w-3xl">
           {isEmpty && (
             <div className="mb-3 flex flex-wrap gap-2">
-              {SUGGESTIONS.map((suggestion) => (
+              {[
+                ...SUGGESTIONS,
+                ...(campaign.planVariants.length > 0
+                  ? [VARIANTS_SUGGESTION]
+                  : []),
+              ].map((suggestion) => (
                 <button
                   key={suggestion}
                   type="button"
@@ -181,15 +323,36 @@ export function ChatConversation({
           )}
 
           <div className="mb-2 flex items-center justify-between gap-3">
-            <button
-              type="button"
-              className="flex items-center gap-2 rounded-md px-2 py-1 text-xs text-secondary transition-colors hover:bg-sunken hover:text-primary"
-            >
-              <Kicker>Focus</Kicker>
-              <span className="font-medium text-primary">Campaign</span>
-              <span className="text-tertiary">Change</span>
-              <ChevronDown className="size-3.5 text-tertiary" strokeWidth={1.75} />
-            </button>
+            <DropdownMenu
+              direction="up"
+              align="start"
+              trigger={
+                <button
+                  type="button"
+                  className="flex items-center gap-2 rounded-md px-2 py-1 text-xs text-secondary transition-colors hover:bg-sunken hover:text-primary"
+                >
+                  <Kicker>Focus</Kicker>
+                  <span className="max-w-48 truncate font-medium text-primary">
+                    {focus}
+                  </span>
+                  <span className="text-tertiary">Change</span>
+                  <ChevronDown className="size-3.5 text-tertiary" strokeWidth={1.75} />
+                </button>
+              }
+              items={[
+                'Campaign',
+                ...campaign.goals.map((goal) => `${goal.code} — ${goal.title}`),
+              ].map((option) => ({
+                label: option,
+                icon:
+                  option === focus ? (
+                    <Check className="size-3.5 text-action" strokeWidth={2} />
+                  ) : (
+                    <span className="size-3.5" aria-hidden />
+                  ),
+                onSelect: () => setFocus(option),
+              }))}
+            />
             <ApprovalToggle />
           </div>
 
@@ -198,36 +361,82 @@ export function ChatConversation({
               event.preventDefault()
               send(draft)
             }}
-            className="flex items-end gap-2 rounded-lg border border-edge-strong bg-raised p-2 shadow-sm focus-within:border-primary focus-within:outline-1 focus-within:outline-primary"
+            className="rounded-lg border border-edge-strong bg-raised p-2 shadow-sm focus-within:border-primary focus-within:outline-1 focus-within:outline-primary"
           >
-            <button
-              type="button"
-              aria-label="Attach file"
-              className="flex size-8 shrink-0 items-center justify-center rounded-md text-tertiary transition-colors hover:bg-sunken hover:text-secondary"
-            >
-              <Paperclip className="size-4" strokeWidth={1.75} />
-            </button>
-            <textarea
-              value={draft}
-              onChange={(event) => setDraft(event.target.value)}
-              onKeyDown={(event) => {
-                if (event.key === 'Enter' && !event.shiftKey) {
-                  event.preventDefault()
-                  send(draft)
-                }
-              }}
-              rows={1}
-              placeholder="Ask about goals, next steps, or anything else…"
-              className="max-h-40 min-h-8 flex-1 resize-none bg-transparent py-1.5 text-sm text-primary outline-none placeholder:text-tertiary"
-            />
-            <button
-              type="submit"
-              aria-label="Send message"
-              disabled={!draft.trim()}
-              className="flex size-8 shrink-0 items-center justify-center rounded-md bg-action text-on-action shadow-xs transition duration-150 ease-smooth hover:bg-action-hover active:scale-95 disabled:pointer-events-none disabled:opacity-40"
-            >
-              <ArrowUp className="size-4" strokeWidth={2} />
-            </button>
+            {attachments.length > 0 && (
+              <div className="mb-1.5 flex flex-wrap gap-1.5 px-1 pt-1">
+                {attachments.map((name) => (
+                  <span
+                    key={name}
+                    className="inline-flex max-w-56 items-center gap-1 rounded-sm border border-edge bg-sunken px-1.5 py-0.5 text-xs text-secondary"
+                  >
+                    <Paperclip className="size-3 shrink-0" strokeWidth={1.75} />
+                    <span className="truncate">{name}</span>
+                    <button
+                      type="button"
+                      aria-label={`Remove ${name}`}
+                      onClick={() =>
+                        setAttachments((prev) =>
+                          prev.filter((item) => item !== name),
+                        )
+                      }
+                      className="text-tertiary transition-colors hover:text-primary"
+                    >
+                      <X className="size-3" strokeWidth={2} />
+                    </button>
+                  </span>
+                ))}
+              </div>
+            )}
+            <div className="flex items-end gap-2">
+              <button
+                type="button"
+                aria-label="Attach file"
+                onClick={() => attachInputRef.current?.click()}
+                className="flex size-8 shrink-0 items-center justify-center rounded-md text-tertiary transition-colors hover:bg-sunken hover:text-secondary"
+              >
+                <Paperclip className="size-4" strokeWidth={1.75} />
+              </button>
+              <input
+                ref={attachInputRef}
+                type="file"
+                multiple
+                className="hidden"
+                onChange={(event) => {
+                  const names = Array.from(event.target.files ?? []).map(
+                    (file) => file.name,
+                  )
+                  if (names.length > 0) {
+                    setAttachments((prev) => [
+                      ...prev,
+                      ...names.filter((name) => !prev.includes(name)),
+                    ])
+                  }
+                  event.target.value = ''
+                }}
+              />
+              <textarea
+                value={draft}
+                onChange={(event) => setDraft(event.target.value)}
+                onKeyDown={(event) => {
+                  if (event.key === 'Enter' && !event.shiftKey) {
+                    event.preventDefault()
+                    send(draft)
+                  }
+                }}
+                rows={1}
+                placeholder="Ask about goals, next steps, or anything else…"
+                className="max-h-40 min-h-8 flex-1 resize-none bg-transparent py-1.5 text-sm text-primary outline-none placeholder:text-tertiary"
+              />
+              <button
+                type="submit"
+                aria-label="Send message"
+                disabled={!draft.trim() && attachments.length === 0}
+                className="flex size-8 shrink-0 items-center justify-center rounded-md bg-action text-on-action shadow-xs transition duration-150 ease-smooth hover:bg-action-hover active:scale-95 disabled:pointer-events-none disabled:opacity-40"
+              >
+                <ArrowUp className="size-4" strokeWidth={2} />
+              </button>
+            </div>
           </form>
         </div>
       </div>

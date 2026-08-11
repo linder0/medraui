@@ -24,3 +24,6 @@ next-env.d.ts
 *.sln
 *.sw?
 *.tsbuildinfo
+
+# Vercel
+.vercel

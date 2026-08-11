@@ -14,6 +14,7 @@ export const navSections = [
       { label: 'Campaigns', path: '/campaigns' },
       { label: 'Examples', path: '/examples' },
       { label: 'Runs', path: '/runs' },
+      { label: 'Iteration', path: '/iteration' },
     ],
   },
   {
@@ -39,7 +40,7 @@ export type NavPath = NavItem['path']
 
 /** Routes that are fully built out; everything else in the sidebar renders
  *  the shared placeholder scaffold via the top-level [section] route. */
-const builtRoutes = new Set<string>(['/', '/campaigns'])
+const builtRoutes = new Set<string>(['/', '/campaigns', '/runs', '/iteration'])
 
 /** Sidebar entries that are still stubs — drives the placeholder route. */
 export function stubNavItems(): NavItem[] {

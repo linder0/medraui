@@ -22,12 +22,7 @@ export default async function CampaignDetailLayout({
     <ExperimentalistProvider campaign={campaign}>
       <div className="relative flex min-w-0 flex-1">
         <CampaignPanel campaign={campaign} />
-        <div className="relative min-w-0 flex-1 overflow-hidden">
-          {/* Warm glow pinned to the pane — content scrolls over it */}
-          <div
-            aria-hidden
-            className="pointer-events-none absolute inset-x-0 top-0 h-64 bg-linear-to-b from-glow to-transparent to-85%"
-          />
+        <div className="relative min-w-0 flex-1 overflow-hidden bg-sunken">
           <div className="relative h-full overflow-y-auto overscroll-contain">
             <div className="mx-auto flex max-w-4xl flex-col gap-6 px-8 py-8">
               {children}

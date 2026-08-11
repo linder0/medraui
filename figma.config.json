@@ -1,0 +1,8 @@
+{
+  "codeConnect": {
+    "include": ["src/design-system/**/*.figma.ts"],
+    "importPaths": {
+      "src/design-system/*": "@/design-system"
+    }
+  }
+}

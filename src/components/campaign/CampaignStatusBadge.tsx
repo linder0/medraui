@@ -1,3 +1,4 @@
+import { Check } from 'lucide-react'
 import { Badge, type BadgeTone } from '@/design-system'
 import type { CampaignStatus } from '@/data/types'
 
@@ -10,7 +11,15 @@ const statusTone: Record<CampaignStatus, BadgeTone> = {
 
 export function CampaignStatusBadge({ status }: { status: CampaignStatus }) {
   return (
-    <Badge tone={statusTone[status]} variant="outline">
+    <Badge
+      tone={statusTone[status]}
+      variant="outline"
+      icon={
+        status === 'planned' ? (
+          <Check className="size-3" strokeWidth={2.25} aria-hidden />
+        ) : undefined
+      }
+    >
       {status}
     </Badge>
   )

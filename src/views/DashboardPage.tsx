@@ -1,3 +1,4 @@
+import Link from 'next/link'
 import { Badge, Card, CardHeader, DataTable, type Column } from '@/design-system'
 import { PageContainer } from '@/components/layout/PageContainer'
 import { campaigns, runs, currentUser } from '@/data/campaigns'
@@ -42,9 +43,19 @@ const runColumns: Column<Run>[] = [
   },
 ]
 
-function StatCard({ label, value, detail }: { label: string; value: string; detail: string }) {
-  return (
-    <Card>
+function StatCard({
+  label,
+  value,
+  detail,
+  href,
+}: {
+  label: string
+  value: string
+  detail: string
+  href?: string
+}) {
+  const card = (
+    <Card className={href ? 'transition-shadow hover:shadow-md' : undefined}>
       <p className="text-sm font-medium text-secondary">{label}</p>
       <p className="mt-2 text-2xl font-semibold tracking-tight text-primary">
         {value}
@@ -52,6 +63,16 @@ function StatCard({ label, value, detail }: { label: string; value: string; deta
       <p className="mt-1 text-xs text-tertiary">{detail}</p>
     </Card>
   )
+
+  if (href) {
+    return (
+      <Link href={href} className="block rounded-lg focus-visible:outline-2">
+        {card}
+      </Link>
+    )
+  }
+
+  return card
 }
 
 export function DashboardPage() {
@@ -72,6 +93,7 @@ export function DashboardPage() {
           label="Active campaigns"
           value={String(activeCampaigns)}
           detail={`${campaigns.length} total campaigns`}
+          href="/campaigns"
         />
         <StatCard
           label="Runs in progress"
