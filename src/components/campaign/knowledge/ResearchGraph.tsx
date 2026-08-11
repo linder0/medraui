@@ -7,7 +7,6 @@ import {
   useRef,
   useState,
   type PointerEvent as ReactPointerEvent,
-  type WheelEvent as ReactWheelEvent,
 } from 'react'
 import { Maximize2, Minus, Plus } from 'lucide-react'
 import type { KnowledgeGraph, KnowledgeNode } from '@/data/types'
@@ -215,20 +214,29 @@ export function ResearchGraph({
     }
   }
 
-  const onWheel = (event: ReactWheelEvent<SVGSVGElement>) => {
-    event.preventDefault()
-    userMovedRef.current = true
-    const rect = svgRef.current?.getBoundingClientRect()
-    const px = event.clientX - (rect?.left ?? 0)
-    const py = event.clientY - (rect?.top ?? 0)
-    setTransform((t) => {
-      const factor = Math.exp(-event.deltaY * 0.0015)
-      const k = Math.min(MAX_ZOOM, Math.max(MIN_ZOOM, t.k * factor))
-      const wx = (px - t.tx) / t.k
-      const wy = (py - t.ty) / t.k
-      return { k, tx: px - wx * k, ty: py - wy * k }
-    })
-  }
+  // React registers `onWheel` as a passive listener, which makes
+  // `preventDefault()` a no-op and lets the page scroll/zoom along with the
+  // graph. Attach a native non-passive listener instead.
+  useEffect(() => {
+    const svg = svgRef.current
+    if (!svg) return
+    const onWheel = (event: WheelEvent) => {
+      event.preventDefault()
+      userMovedRef.current = true
+      const rect = svg.getBoundingClientRect()
+      const px = event.clientX - rect.left
+      const py = event.clientY - rect.top
+      setTransform((t) => {
+        const factor = Math.exp(-event.deltaY * 0.0015)
+        const k = Math.min(MAX_ZOOM, Math.max(MIN_ZOOM, t.k * factor))
+        const wx = (px - t.tx) / t.k
+        const wy = (py - t.ty) / t.k
+        return { k, tx: px - wx * k, ty: py - wy * k }
+      })
+    }
+    svg.addEventListener('wheel', onWheel, { passive: false })
+    return () => svg.removeEventListener('wheel', onWheel)
+  }, [])
 
   const zoomBy = (factor: number) => {
     userMovedRef.current = true
@@ -267,7 +275,6 @@ export function ResearchGraph({
         onPointerDown={onBackgroundPointerDown}
         onPointerMove={onPointerMove}
         onPointerUp={onPointerUp}
-        onWheel={onWheel}
       >
         <g transform={`translate(${transform.tx},${transform.ty}) scale(${transform.k})`}>
           {links.map((link, i) => {
