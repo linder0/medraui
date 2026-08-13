@@ -61,7 +61,17 @@ export function CampaignHeroCard({ campaign }: { campaign: Campaign }) {
         : `${plannedGoals} planned goal${plannedGoals === 1 ? '' : 's'}`
 
   return (
-    <section className="relative overflow-hidden rounded-xl bg-linear-to-br from-[#3b1d8f] via-[#5b35c5] to-[#7b6ef0] p-6 text-white shadow-sm sm:p-7">
+    <section className="relative overflow-hidden rounded-xl bg-[#3b1d8f] p-6 text-white shadow-sm sm:p-7">
+      {/* Photo layer, tinted by the purple gradient above it so white text stays readable. */}
+      <div
+        aria-hidden
+        className="absolute inset-0 bg-cover bg-center"
+        style={{ backgroundImage: 'url(/campaign-egfr.png)' }}
+      />
+      <div
+        aria-hidden
+        className="absolute inset-0 bg-linear-to-br from-[#3b1d8f]/95 via-[#5b35c5]/85 to-[#7b6ef0]/75"
+      />
       {/* Soft highlight so the right side reads lighter, like the reference. */}
       <div
         aria-hidden

@@ -1,5 +1,6 @@
 import { notFound } from 'next/navigation'
 import { campaignSections } from '@/data/navigation'
+import { CampaignScrollArea } from '@/components/campaign/CampaignScrollArea'
 import { CampaignSection } from '@/views/CampaignDetailPage'
 import { CampaignAssays } from '@/views/CampaignAssaysPage'
 import { CampaignChats } from '@/views/CampaignChatsPage'
@@ -18,19 +19,32 @@ export default async function Page({
 
   const campaign = getCampaignOrRedirect(campaignId)
 
-  if (section === 'assays') {
-    return <CampaignAssays campaign={campaign} />
-  }
-
+  // Knowledge is a full-bleed workspace pane — no scroll wrapper.
   if (section === 'knowledge') {
     return <CampaignKnowledge campaign={campaign} />
   }
 
-  if (section === 'chats') {
-    return <CampaignChats campaign={campaign} />
+  if (section === 'assays') {
+    return (
+      <CampaignScrollArea>
+        <CampaignAssays campaign={campaign} />
+      </CampaignScrollArea>
+    )
   }
 
-  return <CampaignSection campaign={campaign} title={meta.label} />
+  if (section === 'chats') {
+    return (
+      <CampaignScrollArea>
+        <CampaignChats campaign={campaign} />
+      </CampaignScrollArea>
+    )
+  }
+
+  return (
+    <CampaignScrollArea>
+      <CampaignSection campaign={campaign} title={meta.label} />
+    </CampaignScrollArea>
+  )
 }
 
 export function generateStaticParams() {

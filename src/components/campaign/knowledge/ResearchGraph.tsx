@@ -266,7 +266,7 @@ export function ResearchGraph({
   return (
     <div
       ref={containerRef}
-      className="relative h-full w-full overflow-hidden rounded-lg bg-panel"
+      className="relative h-full w-full overflow-hidden bg-panel"
     >
       <svg
         ref={svgRef}

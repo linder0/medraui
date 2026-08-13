@@ -9,7 +9,7 @@ import type { Campaign } from '@/data/types'
 function CampaignCard({ campaign }: { campaign: Campaign }) {
   return (
     <Link href={`/campaigns/${campaign.id}`} className="group">
-      <Card className="h-full transition-colors group-hover:border-primary!">
+      <Card className="h-full transition-shadow group-hover:shadow-md">
         <div className="flex items-start justify-between gap-3">
           <Avatar name={campaign.name} size="lg" />
           <CampaignStatusBadge status={campaign.status} />

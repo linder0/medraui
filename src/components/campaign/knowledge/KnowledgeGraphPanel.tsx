@@ -1,15 +1,22 @@
 'use client'
 
-import { useMemo, useState } from 'react'
-import { Card, Kicker } from '@/design-system'
+import { useMemo } from 'react'
+import { Kicker } from '@/design-system'
 import type { KnowledgeGraph, KnowledgeNode } from '@/data/types'
 import { edgeStyle, nodeKindOrder, nodeStyle } from './graphTheme'
 import { ResearchGraph } from './ResearchGraph'
-import { KnowledgeNodeModal } from './KnowledgeNodeModal'
 
-export function KnowledgeGraphPanel({ graph }: { graph: KnowledgeGraph }) {
-  const [selected, setSelected] = useState<KnowledgeNode | null>(null)
-
+/** Selection is controlled by the parent so the tree sidebar, graph, tabs,
+ *  and node modal all agree on the active node. */
+export function KnowledgeGraphPanel({
+  graph,
+  selected,
+  onSelect,
+}: {
+  graph: KnowledgeGraph
+  selected: KnowledgeNode | null
+  onSelect: (node: KnowledgeNode) => void
+}) {
   const counts = useMemo(() => {
     const c: Record<string, number> = {}
     for (const n of graph.nodes) c[n.kind] = (c[n.kind] ?? 0) + 1
@@ -17,8 +24,16 @@ export function KnowledgeGraphPanel({ graph }: { graph: KnowledgeGraph }) {
   }, [graph])
 
   return (
-    <Card padding="none" className="overflow-hidden">
-      <div className="flex flex-wrap items-center gap-x-4 gap-y-2 border-b border-edge px-5 py-3">
+    <div className="flex h-full min-h-0 flex-col">
+      <div className="min-h-0 w-full flex-1">
+        <ResearchGraph
+          graph={graph}
+          onSelectNode={onSelect}
+          selectedId={selected?.id ?? null}
+        />
+      </div>
+
+      <div className="flex shrink-0 flex-wrap items-center gap-x-4 gap-y-2 border-t border-edge px-5 py-3">
         {nodeKindOrder.map((kind) => (
           <LegendDot
             key={kind}
@@ -35,17 +50,7 @@ export function KnowledgeGraphPanel({ graph }: { graph: KnowledgeGraph }) {
           dashed
         />
       </div>
-
-      <div className="h-[560px] w-full">
-        <ResearchGraph
-          graph={graph}
-          onSelectNode={setSelected}
-          selectedId={selected?.id ?? null}
-        />
-      </div>
-
-      <KnowledgeNodeModal node={selected} onClose={() => setSelected(null)} />
-    </Card>
+    </div>
   )
 }
 

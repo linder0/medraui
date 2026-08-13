@@ -22,13 +22,10 @@ export default async function CampaignDetailLayout({
     <ExperimentalistProvider campaign={campaign}>
       <div className="relative flex min-w-0 flex-1">
         <CampaignPanel campaign={campaign} />
-        <div className="relative min-w-0 flex-1 overflow-hidden bg-sunken">
-          <div className="relative h-full overflow-y-auto overscroll-contain">
-            <div className="mx-auto flex max-w-4xl flex-col gap-6 px-8 py-8">
-              {children}
-            </div>
-          </div>
-        </div>
+        {/* Pages wrap themselves in CampaignScrollArea; full-bleed sections
+            (Knowledge) instead pin to this relative container so they can
+            cover the campaign panel, like the chat overlay does. */}
+        {children}
 
         {/* Full-bleed chat overlay — covers the campaign panel and content. */}
         <ExperimentalistOverlay />

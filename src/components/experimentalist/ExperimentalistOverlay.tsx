@@ -339,7 +339,8 @@ function ChatListColumn({
 
       <div className="flex items-center gap-2 p-3">
         <Input
-          leadingIcon={<Search className="size-4" strokeWidth={1.75} />}
+          size="sm"
+          leadingIcon={<Search className="size-3.5" strokeWidth={1.75} />}
           placeholder="Search chats..."
           className="flex-1"
           value={query}
@@ -428,7 +429,8 @@ function KnowledgeColumn({
               icon={<ArrowUp className="size-4" strokeWidth={1.75} />}
             />
             <Input
-              leadingIcon={<Search className="size-4" strokeWidth={1.75} />}
+              size="sm"
+              leadingIcon={<Search className="size-3.5" strokeWidth={1.75} />}
               placeholder="Search files..."
               className="flex-1"
               value={query}

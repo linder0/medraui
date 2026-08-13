@@ -31,6 +31,7 @@ import { currentUser, organization } from '@/data/campaigns'
 import { useProximityHover, type ItemRect } from '@/hooks/useProximityHover'
 import { isPathActive } from '@/lib/routing'
 import { cn } from '@/lib/cn'
+import { SIDEBAR_COLLAPSED_COOKIE } from './sidebar-cookie'
 
 /**
  * Collapse choreography: labels fade out quickly while the width
@@ -347,8 +348,19 @@ function SidebarFooter({ collapsed }: { collapsed: boolean }) {
   )
 }
 
-export function Sidebar() {
-  const [collapsed, setCollapsed] = useState(false)
+export function Sidebar({
+  initialCollapsed = false,
+}: {
+  initialCollapsed?: boolean
+}) {
+  const [collapsed, setCollapsedState] = useState(initialCollapsed)
+
+  // Persist to a cookie so the server renders the next full page load
+  // in the same state (see AppShell).
+  const setCollapsed = (value: boolean) => {
+    setCollapsedState(value)
+    document.cookie = `${SIDEBAR_COLLAPSED_COOKIE}=${value}; path=/; max-age=31536000; SameSite=Lax`
+  }
 
   return (
     <aside

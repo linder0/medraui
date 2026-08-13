@@ -1,24 +1,45 @@
 import { forwardRef, type InputHTMLAttributes, type ReactNode } from 'react'
 import { cn } from '@/lib/cn'
 
-export interface InputProps extends InputHTMLAttributes<HTMLInputElement> {
+type InputSize = 'sm' | 'md'
+
+export interface InputProps
+  extends Omit<InputHTMLAttributes<HTMLInputElement>, 'size'> {
   /** Icon rendered inside the field, before the text. */
   leadingIcon?: ReactNode
+  /** sm is the compact pill used for inline search/filter fields — same
+   *  height as sm buttons so mixed toolbars stay flush. */
+  size?: InputSize
+}
+
+const sizeClasses: Record<InputSize, string> = {
+  sm: 'h-7 gap-1.5 rounded-md px-2.5',
+  md: 'h-8.5 gap-2 rounded-md px-3',
+}
+
+const textClasses: Record<InputSize, string> = {
+  sm: 'text-xs',
+  md: 'text-sm',
 }
 
 export const Input = forwardRef<HTMLInputElement, InputProps>(
-  ({ leadingIcon, className, ...props }, ref) => (
+  ({ leadingIcon, size = 'md', className, ...props }, ref) => (
     <div
       className={cn(
-        'flex h-8.5 items-center gap-2 rounded-md border border-edge-strong bg-raised px-3 shadow-xs transition-colors',
-        'focus-within:border-ring focus-within:outline-1 focus-within:outline-ring',
+        'flex items-center border border-edge-strong bg-raised shadow-xs transition-colors',
+        // Same focus treatment as the AI chat composer.
+        'focus-within:border-primary focus-within:outline-1 focus-within:outline-primary',
+        sizeClasses[size],
         className,
       )}
     >
       {leadingIcon && <span className="shrink-0 text-tertiary">{leadingIcon}</span>}
       <input
         ref={ref}
-        className="w-full min-w-0 bg-transparent text-sm text-primary outline-none placeholder:text-tertiary"
+        className={cn(
+          'w-full min-w-0 bg-transparent text-primary outline-none placeholder:text-tertiary',
+          textClasses[size],
+        )}
         {...props}
       />
     </div>

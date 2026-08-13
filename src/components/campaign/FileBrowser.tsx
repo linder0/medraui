@@ -90,7 +90,7 @@ export function FileBrowser({ files }: { files: CampaignFile[] }) {
         <Input
           leadingIcon={<Search className="size-4" strokeWidth={1.75} />}
           placeholder="Search files..."
-          className="min-w-40 flex-1"
+          className="min-w-40 flex-1 rounded-lg"
         />
         <Button leadingIcon={<FolderPlus className="size-4" strokeWidth={1.75} />}>
           New folder
