@@ -1,11 +1,9 @@
 'use client'
 
 import { useMemo, useState } from 'react'
-import Link from 'next/link'
 import { AnimatePresence, motion } from 'motion/react'
 import {
   ArrowDownAZ,
-  ArrowLeft,
   ChevronDown,
   ChevronRight,
   ChevronsDownUp,
@@ -18,7 +16,7 @@ import {
   Upload,
   X,
 } from 'lucide-react'
-import { IconButton } from '@/design-system'
+import { IconButton, MedraLogo } from '@/design-system'
 import type {
   KnowledgeGraph,
   KnowledgeNode,
@@ -42,15 +40,12 @@ const folderLabel: Record<KnowledgeNodeKind, string> = {
  * in the graph and opens its detail modal.
  */
 export function KnowledgeTreeSidebar({
-  backHref,
   vaultName,
   graph,
   selectedId,
   onSelect,
   onCollapse,
 }: {
-  /** Campaign overview route — the pane owns the "back" navigation. */
-  backHref: string
   vaultName: string
   graph: KnowledgeGraph
   selectedId: string | null
@@ -113,16 +108,10 @@ export function KnowledgeTreeSidebar({
 
   return (
     <aside className="flex h-full w-64 shrink-0 flex-col border-r border-edge bg-panel">
-      {/* The back row is h-13 to line up with the central pane's tab strip
+      {/* The brand row is h-13 to line up with the central pane's tab strip
           and the chat pane header, keeping that border continuous. */}
-      <div className="flex h-13 shrink-0 items-center border-b border-edge px-3">
-        <Link
-          href={backHref}
-          className="inline-flex min-w-0 items-center gap-1.5 text-sm font-medium text-secondary transition-colors hover:text-primary"
-        >
-          <ArrowLeft className="size-4 shrink-0" strokeWidth={1.75} />
-          <span className="truncate">Back to overview</span>
-        </Link>
+      <div className="flex h-13 shrink-0 items-center border-b border-edge px-4">
+        <MedraLogo className="h-4 w-auto text-primary" />
       </div>
 
       <div className="flex h-9 shrink-0 items-center gap-0.5 border-b border-edge px-1.5">

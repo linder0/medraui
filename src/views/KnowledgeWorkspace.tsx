@@ -7,10 +7,8 @@ import {
   type PointerEvent as ReactPointerEvent,
   type ReactNode,
 } from 'react'
-import Link from 'next/link'
 import { AnimatePresence, motion } from 'motion/react'
 import {
-  ArrowLeft,
   BookOpen,
   Brain,
   ChevronLeft,
@@ -135,13 +133,11 @@ function WorkspaceTab({
 }
 
 /**
- * Knowledge is a full workspace pane (tree left, tabbed graph/notes center,
- * chat right) rather than a scrolling document page. Like the chat overlay,
- * it pins itself to the campaign layout's relative container so it covers
- * the campaign panel; the z-index keeps it under the Experimentalist
- * overlay (z-40).
+ * The knowledge workspace is the app: vault tree left, tabbed graph/notes
+ * center, chat right. It pins itself to the page's relative container;
+ * the z-index keeps it under the Experimentalist overlay (z-40).
  */
-export function CampaignKnowledge({ campaign }: { campaign: Campaign }) {
+export function KnowledgeWorkspace({ campaign }: { campaign: Campaign }) {
   const { openExperimentalist } = useExperimentalist()
   // Memoized so the force simulation isn't restarted by unrelated re-renders.
   const graph = useMemo(() => getKnowledgeGraph(campaign.id), [campaign.id])
@@ -323,7 +319,6 @@ export function CampaignKnowledge({ campaign }: { campaign: Campaign }) {
               className="shrink-0 overflow-hidden"
             >
               <KnowledgeTreeSidebar
-                backHref={`/campaigns/${campaign.id}`}
                 vaultName={campaign.name}
                 graph={graph}
                 selectedId={selected?.id ?? null}
@@ -354,16 +349,6 @@ export function CampaignKnowledge({ campaign }: { campaign: Campaign }) {
                   className="shrink-0 overflow-hidden"
                 >
                   <div className="flex items-center gap-0.5">
-                    {/* The back link lives in the tree pane, so it docks here
-                        alongside the toggle while the pane is collapsed. */}
-                    <Link
-                      href={`/campaigns/${campaign.id}`}
-                      aria-label="Back to overview"
-                      title="Back to overview"
-                      className="inline-flex size-7 shrink-0 items-center justify-center rounded-sm text-secondary transition-colors hover:bg-sunken hover:text-primary"
-                    >
-                      <ArrowLeft className="size-4" strokeWidth={1.75} />
-                    </Link>
                     <IconButton
                       label="Show knowledge tree"
                       size="sm"

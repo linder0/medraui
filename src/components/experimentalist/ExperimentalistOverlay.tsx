@@ -7,7 +7,6 @@ import {
   useState,
   type FormEvent,
 } from 'react'
-import { usePathname, useRouter } from 'next/navigation'
 import {
   ArrowLeft,
   ArrowUp,
@@ -249,29 +248,7 @@ function ChatListColumn({
   onDeleteChat: (id: string) => void
 }) {
   const { close } = useExperimentalist()
-  const router = useRouter()
-  const pathname = usePathname()
   const [query, setQuery] = useState('')
-  const pendingClose = useRef(false)
-
-  // On the /chats route, "Back to campaign" navigates to the overview.
-  // The overlay stays up until the route actually changes — closing first
-  // would flash the /chats underlay (sidebar briefly showing Chats active).
-  const backToCampaign = () => {
-    if (pathname.endsWith('/chats')) {
-      pendingClose.current = true
-      router.push(`/campaigns/${campaign.id}`)
-    } else {
-      close()
-    }
-  }
-
-  useEffect(() => {
-    if (pendingClose.current && !pathname.endsWith('/chats')) {
-      pendingClose.current = false
-      close()
-    }
-  }, [pathname, close])
 
   const normalized = query.trim().toLowerCase()
   const visibleChats = normalized
@@ -289,11 +266,11 @@ function ChatListColumn({
       <div className="flex items-center justify-between gap-2 border-b border-edge p-3">
         <button
           type="button"
-          onClick={backToCampaign}
+          onClick={close}
           className="inline-flex items-center gap-1.5 text-sm font-medium text-secondary transition-colors hover:text-primary"
         >
           <ArrowLeft className="size-4" strokeWidth={1.75} />
-          Back to campaign
+          Back to workspace
         </button>
         <div className="flex items-center gap-1">
           <DropdownMenu
